@@ -1,0 +1,1116 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>六级单词默写本</title>
+    <style>
+        *{box-sizing:border-box;font-family:system-ui}
+        body{max-width:780px;margin:0 auto;padding:16px;background:#121826;color:#fff;min-height:100vh}
+        h2{margin:12px 0 4px}
+        h4{margin:0}
+        .sub{color:#9ca3af;font-size:13px;margin:2px 0 12px}
+        .tabs{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+        .tab{background:#1f2937;border:1px solid #374151;color:#e5e7eb;padding:10px 16px;border-radius:10px;cursor:pointer;font-size:15px}
+        .tab.on{background:#2563eb;border-color:#2563eb;color:#fff}
+        .box{background:#1f2937;padding:16px;border-radius:12px;margin-bottom:14px}
+        textarea,input[type=text]{width:100%;padding:12px;border-radius:8px;border:none;font-size:16px;margin:8px 0;background:#111827;color:#fff}
+        button{padding:9px 14px;border:none;border-radius:8px;margin:4px;cursor:pointer;font-size:14px;color:#fff;background:#374151}
+        .btn-blue{background:#2563eb}
+        .btn-green{background:#10b981}
+        .btn-red{background:#ef4444}
+        .btn-gray{background:#374151}
+        .tool-row{display:flex;flex-wrap:wrap;gap:6px}
+        .stats-row{display:flex;flex-wrap:wrap;gap:10px}
+        .stat{background:#111827;border:1px solid #374151;border-radius:10px;padding:10px 14px;text-align:center;flex:1;min-width:90px}
+        .stat b{display:block;font-size:22px}
+        .stat span{font-size:12px;color:#9ca3af}
+        .word-card{padding:26px;text-align:center;font-size:26px;background:#374151;border-radius:12px;margin:14px 0;min-height:150px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;gap:8px}
+        .ph{font-size:14px;color:#93c5fd}
+        .pos-tag{font-size:13px;color:#fbbf24;background:#1e293b;border:1px solid #78350f;border-radius:6px;padding:1px 7px;display:inline-block}
+        .result{font-size:17px;margin-top:10px;min-height:26px}
+        .right{color:#34d399}
+        .wrong{color:#f87171}
+        .quiz-opt{display:block;width:100%;text-align:left;background:#111827;border:1px solid #374151;padding:12px 14px;border-radius:10px;margin:6px 0;font-size:16px;cursor:pointer;color:#fff}
+        .quiz-opt:hover{border-color:#2563eb}
+        .quiz-opt:disabled{cursor:default}
+        .quiz-ok{background:#10b981!important;border-color:#10b981!important}
+        .quiz-no{background:#ef4444!important;border-color:#ef4444!important}
+        .sync-box{background:#111827;border:1px solid #374151;border-radius:12px;padding:14px;margin:12px 0;font-size:15px;line-height:1.8}
+        .sync-box h4{margin:0 0 8px;color:#93c5fd}
+        .cls-card{background:#111827;border:1px solid #374151;border-radius:10px;padding:12px;margin-bottom:10px}
+        .cls-tags{font-size:14px;color:#93c5fd;margin-bottom:8px}
+        .cls-chip{background:#1e3a8a;color:#fff;border:none;border-radius:999px;padding:6px 14px;margin:4px;cursor:pointer;font-size:14px}
+        .cls-chip:hover{background:#2563eb}
+        .cls-chip-on{background:#10b981}
+        .cls-body{margin-top:8px}
+        .cls-word{padding:8px 12px;border-bottom:1px solid #374151;font-size:15px;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+        .cls-word:last-child{border-bottom:none}
+        .cls-cn{color:#9ca3af;font-size:13px}
+        .bk-row{display:flex;align-items:center;gap:10px;padding:9px 6px;border-bottom:1px solid #2b3445;font-size:15px;cursor:pointer;flex-wrap:wrap}
+        .bk-row:hover{background:#1d2636}
+        .bk-en{font-weight:600;min-width:110px}
+        .bk-pos{color:#fbbf24;font-size:12px;background:#1e293b;border:1px solid #374151;border-radius:6px;padding:1px 7px;min-width:36px;text-align:center}
+        .bk-ph{color:#93c5fd;font-size:12px;min-width:90px}
+        .bk-cn{flex:1;color:#d1d5db;min-width:120px}
+        .bk-level{font-size:12px;padding:2px 8px;border-radius:999px}
+        .lv0{background:#ef4444;color:#fff}
+        .lv1{background:#f59e0b;color:#fff}
+        .lv2{background:#10b981;color:#fff}
+        .heat{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin:10px 0 6px}
+        .day{aspect-ratio:1;border-radius:6px;background:#1d2636;display:flex;align-items:center;justify-content:center;font-size:11px;color:#6b7280}
+        .day.d0{background:#3b82f6}
+        .day.d1{background:#f59e0b}
+        .day.d2{background:#ef4444}
+        .day.d3{background:#10b981}
+        .bar{display:flex;height:24px;border-radius:999px;overflow:hidden;margin:10px 0;background:#1d2636}
+        .bar div{display:flex;align-items:center;justify-content:center;font-size:12px;color:#fff;min-width:0}
+        .none{color:#9ca3af;text-align:center;padding:20px}
+    </style>
+</head>
+<body>
+    <h2>📖 六级单词默写系统</h2>
+    <p class="sub" id="todayLine">今日：还没开始练习，加油！</p>
+
+    <div class="tabs">
+        <button class="tab on" data-view="practice" onclick="showView('practice')">✏️ 默写练习</button>
+        <button class="tab" data-view="book" onclick="showView('book')">📒 单词本</button>
+        <button class="tab" data-view="stats" onclick="showView('stats')">📊 学习统计</button>
+        <button class="tab" data-view="cls" onclick="showView('cls')">📚 词义分类</button>
+    </div>
+
+    <!-- 默写练习 -->
+    <div id="view-practice">
+        <div class="box tool-row">
+            <button class="btn-green" onclick="switchMode(0)">看英文 → 默写中文</button>
+            <button class="btn-green" onclick="switchMode(1)">看中文 → 默写英文</button>
+            <button id="quizBtn" onclick="toggleQuiz()">📝 选择题模式：关</button>
+        </div>
+        <div class="box tool-row">
+            <button class="btn-blue" onclick="pickAll()">全部随机默写</button>
+            <button onclick="pickWrong()">只默写错题</button>
+            <button onclick="pickWeak()">未掌握优先</button>
+        </div>
+        <div class="word-card" id="showWord" onclick="toggleSync()">点击开始默写（点卡片看同义词）</div>
+        <div class="sync-box" id="syncBox" style="display:none"></div>
+        <input type="text" id="answerInput" placeholder="在这里输入你的答案，回车提交" onkeydown="if(event.key==='Enter')checkAnswer()">
+        <div id="quizBox"></div>
+        <div class="tool-row">
+            <button class="btn-blue" onclick="checkAnswer()">提交答案</button>
+            <button onclick="nextWord()">下一个</button>
+            <button onclick="toggleSync()">🔗 同义词</button>
+            <button onclick="speakWord()">🔊 朗读</button>
+        </div>
+        <div class="result" id="resultText"></div>
+    </div>
+
+    <!-- 单词本 -->
+    <div id="view-book" style="display:none">
+        <div class="box">
+            <h4 style="margin-bottom:6px">📥 词库管理</h4>
+            <div class="tool-row">
+                <button class="btn-blue" onclick="loadPreset()">📦 载入内置六级词库</button>
+                <button onclick="exportWords()">💾 导出备份</button>
+                <button onclick="document.getElementById('fileInput').click()">📂 导入备份文件</button>
+                <input type="file" id="fileInput" accept=".txt,.csv" style="display:none" onchange="importFile(this)">
+                <button class="btn-red" onclick="clearAll()">🗑️ 清空词库</button>
+            </div>
+            <textarea id="wordInput" rows="5" placeholder="批量导入格式（一行一条，| 分隔）：&#10;英文|释义&#10;英文|释义|音标|例句|词性&#10;示例：&#10;abandon|放弃；抛弃|əˈbændən|He abandoned the plan.|v.&#10;fossil|化石|ˈfɒsl|This is a fossil.|n."></textarea>
+            <button class="btn-green" onclick="importWords()">导入单词库</button>
+            <div class="sub" style="margin-top:8px">词性标注：n.名词 v.动词 adj.形容词 adv.副词 prep.介词 conj.连词 pron.代词 num.数词 phr.短语 · v./n. 表示兼类</div>
+        </div>
+        <div class="box">
+            <h4 style="margin-bottom:6px">🔎 单词本（共 <span id="bkCount">0</span> 词）</h4>
+            <input type="text" id="bkSearch" placeholder="搜索英文或释义…" oninput="renderBook()">
+            <div id="bkList"></div>
+        </div>
+    </div>
+
+    <!-- 学习统计 -->
+    <div id="view-stats" style="display:none">
+        <div class="box">
+            <h4 style="margin-bottom:10px">📅 今日概览</h4>
+            <div class="stats-row" id="statToday"></div>
+        </div>
+        <div class="box">
+            <h4 style="margin-bottom:4px">🔥 连续打卡 <b id="streakNum">0</b> 天</h4>
+            <div class="heat" id="heatMap"></div>
+            <div class="sub">近 30 天 · 绿 ≥80% 正确率 · 蓝 ≥50% · 橙 ≥20% · 红 &lt;20% · 灰 未练习</div>
+        </div>
+        <div class="box">
+            <h4 style="margin-bottom:6px">🎯 掌握度分布（共 <span id="lvCount">0</span> 词）</h4>
+            <div class="bar" id="lvBar"></div>
+            <div class="stats-row" id="lvLegend"></div>
+        </div>
+    </div>
+
+    <!-- 词义分类 -->
+    <div id="view-cls" style="display:none">
+        <div class="box">
+            <h4 style="margin-bottom:6px">📚 词义分类 <span id="clsCount"></span></h4>
+            <div id="clsList"></div>
+        </div>
+    </div>
+
+<script>
+// ================= 内置六级词库（122 词，含词性） =================
+const PRESET_WORDS = [
+    {en:'abandon', cn:'放弃；抛弃', pos:'v.', ph:'əˈbændən', ex:'He abandoned the plan.'},
+    {en:'abolish', cn:'废除；取消', pos:'v.', ph:'əˈbɒlɪʃ', ex:'Slavery was abolished in 1865.'},
+    {en:'absurd', cn:'荒谬的', pos:'adj.', ph:'əbˈsɜːd', ex:'The idea sounds absurd.'},
+    {en:'abundant', cn:'丰富的；充裕的', pos:'adj.', ph:'əˈbʌndənt', ex:'The country has abundant resources.'},
+    {en:'accelerate', cn:'加速', pos:'v.', ph:'əkˈseləreɪt', ex:'The car accelerated quickly.'},
+    {en:'accommodate', cn:'容纳；为…提供住宿', pos:'v.', ph:'əˈkɒmədeɪt', ex:'The hotel can accommodate 500 guests.'},
+    {en:'accumulate', cn:'积累', pos:'v.', ph:'əˈkjuːmjəleɪt', ex:'Dust accumulated on the shelf.'},
+    {en:'acknowledge', cn:'承认；致谢', pos:'v.', ph:'əkˈnɒlɪdʒ', ex:'He acknowledged his mistake.'},
+    {en:'acquire', cn:'获得；习得', pos:'v.', ph:'əˈkwaɪə', ex:'She acquired new skills quickly.'},
+    {en:'adapt', cn:'适应；改编', pos:'v.', ph:'əˈdæpt', ex:'We must adapt to the change.'},
+    {en:'adequate', cn:'足够的；适当的', pos:'adj.', ph:'ˈædɪkwət', ex:'Make sure you get adequate sleep.'},
+    {en:'adhere', cn:'坚持；黏附', pos:'v.', ph:'ədˈhɪə', ex:'Adhere to the school rules.'},
+    {en:'adjacent', cn:'邻近的', pos:'adj.', ph:'əˈdʒeɪsnt', ex:'The hotel is adjacent to the station.'},
+    {en:'advocate', cn:'提倡；拥护者', pos:'v./n.', ph:'ˈædvəkeɪt', ex:'They advocate free education.'},
+    {en:'aggravate', cn:'加重；恶化', pos:'v.', ph:'ˈæɡrəveɪt', ex:'Stress aggravates his illness.'},
+    {en:'alleviate', cn:'减轻；缓解', pos:'v.', ph:'əˈliːvieɪt', ex:'The medicine alleviated the pain.'},
+    {en:'ambiguous', cn:'模棱两可的', pos:'adj.', ph:'æmˈbɪɡjuəs', ex:'His answer was ambiguous.'},
+    {en:'ambitious', cn:'有雄心的', pos:'adj.', ph:'æmˈbɪʃəs', ex:'She is ambitious and hardworking.'},
+    {en:'amplify', cn:'放大；增强', pos:'v.', ph:'ˈæmplɪfaɪ', ex:'The device amplifies sound.'},
+    {en:'anonymous', cn:'匿名的', pos:'adj.', ph:'əˈnɒnɪməs', ex:'The donor wished to remain anonymous.'},
+    {en:'anticipate', cn:'预期；预料', pos:'v.', ph:'ænˈtɪsɪpeɪt', ex:'We anticipate a rise in prices.'},
+    {en:'appeal', cn:'呼吁；吸引力', pos:'v./n.', ph:'əˈpiːl', ex:'The idea appeals to me.'},
+    {en:'applaud', cn:'鼓掌；称赞', pos:'v.', ph:'əˈplɔːd', ex:'The audience applauded loudly.'},
+    {en:'appraise', cn:'评估；估价', pos:'v.', ph:'əˈpreɪz', ex:'The house was appraised at 300,000 dollars.'},
+    {en:'approve', cn:'批准；赞成', pos:'v.', ph:'əˈpruːv', ex:'The committee approved the plan.'},
+    {en:'arbitrary', cn:'任意的；武断的', pos:'adj.', ph:'ˈɑːbɪtrəri', ex:'The decision seemed arbitrary.'},
+    {en:'artificial', cn:'人造的；矫揉造作的', pos:'adj.', ph:'ˌɑːtɪˈfɪʃl', ex:'The flower is artificial.'},
+    {en:'ascend', cn:'上升；攀登', pos:'v.', ph:'əˈsend', ex:'The balloon ascended slowly.'},
+    {en:'assess', cn:'评估', pos:'v.', ph:'əˈses', ex:'Teachers assess students progress.'},
+    {en:'assign', cn:'分配；指派', pos:'v.', ph:'əˈsaɪn', ex:'The task was assigned to me.'},
+    {en:'assist', cn:'帮助；协助', pos:'v.', ph:'əˈsɪst', ex:'She assisted me with the report.'},
+    {en:'assume', cn:'假定；承担', pos:'v.', ph:'əˈsjuːm', ex:'I assume you are right.'},
+    {en:'assure', cn:'向…保证', pos:'v.', ph:'əˈʃʊə', ex:'I assure you it is safe.'},
+    {en:'attach', cn:'附上；系上', pos:'v.', ph:'əˈtætʃ', ex:'Please attach the file.'},
+    {en:'attain', cn:'达到；获得', pos:'v.', ph:'əˈteɪn', ex:'He attained his goal at last.'},
+    {en:'attribute', cn:'把…归因于；属性', pos:'v./n.', ph:'əˈtrɪbjuːt', ex:'She attributes her success to hard work.'},
+    {en:'authentic', cn:'真实的；可靠的', pos:'adj.', ph:'ɔːˈθentɪk', ex:'This is an authentic painting.'},
+    {en:'authority', cn:'权威；当局', pos:'n.', ph:'ɔːˈθɒrəti', ex:'The authority approved the project.'},
+    {en:'available', cn:'可获得的；有空的', pos:'adj.', ph:'əˈveɪləbl', ex:'The book is available online.'},
+    {en:'awkward', cn:'尴尬的；笨拙的', pos:'adj.', ph:'ˈɔːkwəd', ex:'There was an awkward silence.'},
+    {en:'barrier', cn:'障碍；屏障', pos:'n.', ph:'ˈbæriə', ex:'Language is a barrier to communication.'},
+    {en:'benefit', cn:'利益；有益于', pos:'v./n.', ph:'ˈbenɪfɪt', ex:'Exercise benefits your health.'},
+    {en:'bias', cn:'偏见；使有偏向', pos:'n./v.', ph:'ˈbaɪəs', ex:'The report shows a clear bias.'},
+    {en:'boost', cn:'促进；提高', pos:'v./n.', ph:'buːst', ex:'The news boosted our confidence.'},
+    {en:'budget', cn:'预算', pos:'n.', ph:'ˈbʌdʒɪt', ex:'We have a limited budget.'},
+    {en:'calculate', cn:'计算', pos:'v.', ph:'ˈkælkjuleɪt', ex:'Calculate the total cost first.'},
+    {en:'campaign', cn:'运动；战役', pos:'n.', ph:'kæmˈpeɪn', ex:'They launched a campaign against smoking.'},
+    {en:'capable', cn:'有能力的', pos:'adj.', ph:'ˈkeɪpəbl', ex:'She is capable of handling it.'},
+    {en:'capture', cn:'捕获；吸引', pos:'v.', ph:'ˈkæptʃə', ex:'The photo captured the moment.'},
+    {en:'cease', cn:'停止', pos:'v.', ph:'siːs', ex:'The rain has ceased.'},
+    {en:'challenge', cn:'挑战', pos:'n./v.', ph:'ˈtʃælɪndʒ', ex:'He accepted the challenge.'},
+    {en:'circumstance', cn:'环境；情况', pos:'n.', ph:'ˈsɜːkəmstəns', ex:'Under no circumstances should you quit.'},
+    {en:'clarify', cn:'澄清；阐明', pos:'v.', ph:'ˈklærɪfaɪ', ex:'Let me clarify the point.'},
+    {en:'coincide', cn:'同时发生；一致', pos:'v.', ph:'ˌkəʊɪnˈsaɪd', ex:'My views coincide with yours.'},
+    {en:'collapse', cn:'倒塌；崩溃', pos:'v./n.', ph:'kəˈlæps', ex:'The bridge collapsed in the storm.'},
+    {en:'commence', cn:'开始', pos:'v.', ph:'kəˈmens', ex:'The ceremony will commence at nine.'},
+    {en:'commit', cn:'犯(罪)；承诺；投入', pos:'v.', ph:'kəˈmɪt', ex:'He committed a serious mistake.'},
+    {en:'compensate', cn:'补偿；赔偿', pos:'v.', ph:'ˈkɒmpenseɪt', ex:'The firm compensated him for the loss.'},
+    {en:'competent', cn:'有能力的；胜任的', pos:'adj.', ph:'ˈkɒmpɪtənt', ex:'She is competent for the job.'},
+    {en:'compile', cn:'汇编；编译', pos:'v.', ph:'kəmˈpaɪl', ex:'He compiled the data into a report.'},
+    {en:'complement', cn:'补充；补足', pos:'n./v.', ph:'ˈkɒmplɪment', ex:'The wine complements the meal.'},
+    {en:'comply', cn:'遵守；遵从', pos:'v.', ph:'kəmˈplaɪ', ex:'You must comply with the rules.'},
+    {en:'comprehensive', cn:'全面的；综合的', pos:'adj.', ph:'ˌkɒmprɪˈhensɪv', ex:'We offer comprehensive training.'},
+    {en:'compromise', cn:'妥协；折中', pos:'n./v.', ph:'ˈkɒmprəmaɪz', ex:'Both sides reached a compromise.'},
+    {en:'conceal', cn:'隐藏；隐瞒', pos:'v.', ph:'kənˈsiːl', ex:'She concealed her anger.'},
+    {en:'concentrate', cn:'集中；专心', pos:'v.', ph:'ˈkɒnsntreɪt', ex:'I cannot concentrate in this noise.'},
+    {en:'condemn', cn:'谴责；判刑', pos:'v.', ph:'kənˈdem', ex:'The world condemned the attack.'},
+    {en:'conduct', cn:'实施；行为', pos:'v./n.', ph:'kənˈdʌkt', ex:'The survey was conducted online.'},
+    {en:'confident', cn:'自信的', pos:'adj.', ph:'ˈkɒnfɪdənt', ex:'She is confident about the exam.'},
+    {en:'confine', cn:'限制；监禁', pos:'v.', ph:'kənˈfaɪn', ex:'Please confine your remarks to the topic.'},
+    {en:'conflict', cn:'冲突；矛盾', pos:'n./v.', ph:'ˈkɒnflɪkt', ex:'The conflict lasted for years.'},
+    {en:'confront', cn:'面对；对抗', pos:'v.', ph:'kənˈfrʌnt', ex:'We must confront the problem.'},
+    {en:'conscience', cn:'良心', pos:'n.', ph:'ˈkɒnʃəns', ex:'His conscience troubled him.'},
+    {en:'conscious', cn:'意识到的；清醒的', pos:'adj.', ph:'ˈkɒnʃəs', ex:'She was conscious of the danger.'},
+    {en:'consequence', cn:'后果；结果', pos:'n.', ph:'ˈkɒnsɪkwəns', ex:'The accident had serious consequences.'},
+    {en:'considerable', cn:'相当大的', pos:'adj.', ph:'kənˈsɪdərəbl', ex:'He earns a considerable salary.'},
+    {en:'consistent', cn:'一致的；始终如一的', pos:'adj.', ph:'kənˈsɪstənt', ex:'His actions are consistent with his words.'},
+    {en:'constant', cn:'不断的；恒定的', pos:'adj.', ph:'ˈkɒnstənt', ex:'She is under constant pressure.'},
+    {en:'constitute', cn:'构成；组成', pos:'v.', ph:'ˈkɒnstɪtjuːt', ex:'Women constitute half of the staff.'},
+    {en:'construct', cn:'建造；构建', pos:'v.', ph:'kənˈstrʌkt', ex:'The bridge was constructed in 1990.'},
+    {en:'consult', cn:'咨询；查阅', pos:'v.', ph:'kənˈsʌlt', ex:'Consult your doctor first.'},
+    {en:'consume', cn:'消耗；消费', pos:'v.', ph:'kənˈsjuːm', ex:'Cars consume a lot of fuel.'},
+    {en:'contaminate', cn:'污染', pos:'v.', ph:'kənˈtæmɪneɪt', ex:'The river was contaminated.'},
+    {en:'contemporary', cn:'当代的；同时代的', pos:'adj./n.', ph:'kənˈtemprəri', ex:'I prefer contemporary art.'},
+    {en:'contempt', cn:'轻视；蔑视', pos:'n.', ph:'kənˈtempt', ex:'He looked at them with contempt.'},
+    {en:'contend', cn:'主张；竞争', pos:'v.', ph:'kənˈtend', ex:'She contends that the policy is unfair.'},
+    {en:'contradict', cn:'反驳；与…矛盾', pos:'v.', ph:'ˌkɒntrəˈdɪkt', ex:"Don't contradict your father."},
+    {en:'controversy', cn:'争议', pos:'n.', ph:'ˈkɒntrəvɜːsi', ex:'The film caused great controversy.'},
+    {en:'convey', cn:'传达；运送', pos:'v.', ph:'kənˈveɪ', ex:'Words cannot convey my feelings.'},
+    {en:'convince', cn:'使信服', pos:'v.', ph:'kənˈvɪns', ex:'He convinced me to stay.'},
+    {en:'cooperate', cn:'合作', pos:'v.', ph:'kəʊˈɒpəreɪt', ex:'The two firms cooperated on the project.'},
+    {en:'coordinate', cn:'协调', pos:'v.', ph:'kəʊˈɔːdɪneɪt', ex:'She coordinated the whole event.'},
+    {en:'correlate', cn:'相关；关联', pos:'v.', ph:'ˈkɒrəleɪt', ex:'Smoking correlates with lung cancer.'},
+    {en:'correspond', cn:'相符；通信', pos:'v.', ph:'ˌkɒrəˈspɒnd', ex:'His story corresponds with the facts.'},
+    {en:'counterpart', cn:'对应的人或物', pos:'n.', ph:'ˈkaʊntəpɑːt', ex:'The minister met his counterpart.'},
+    {en:'crucial', cn:'至关重要的', pos:'adj.', ph:'ˈkruːʃl', ex:'Timing is crucial.'},
+    {en:'cultivate', cn:'培养；耕作', pos:'v.', ph:'ˈkʌltɪveɪt', ex:'He cultivated the habit of reading.'},
+    {en:'curb', cn:'抑制；控制', pos:'v./n.', ph:'kɜːb', ex:'We must curb inflation.'},
+    {en:'curriculum', cn:'课程', pos:'n.', ph:'kəˈrɪkjələm', ex:'The curriculum includes science.'},
+    {en:'cynical', cn:'愤世嫉俗的', pos:'adj.', ph:'ˈsɪnɪkl', ex:'He is cynical about politics.'},
+    {en:'debate', cn:'辩论；讨论', pos:'n./v.', ph:'dɪˈbeɪt', ex:'The issue is still under debate.'},
+    {en:'decade', cn:'十年', pos:'n.', ph:'ˈdekeɪd', ex:'Great changes happened in the past decade.'},
+    {en:'decline', cn:'下降；拒绝', pos:'v./n.', ph:'dɪˈklaɪn', ex:'Sales declined sharply.'},
+    {en:'dedicate', cn:'献身；致力于', pos:'v.', ph:'ˈdedɪkeɪt', ex:'She dedicated her life to science.'},
+    {en:'deduce', cn:'推断；演绎', pos:'v.', ph:'dɪˈdjuːs', ex:'We deduced the truth from the clues.'},
+    {en:'deficiency', cn:'缺乏；不足', pos:'n.', ph:'dɪˈfɪʃnsi', ex:'Vitamin deficiency causes illness.'},
+    {en:'deficit', cn:'赤字；亏损', pos:'n.', ph:'ˈdefɪsɪt', ex:'The country has a trade deficit.'},
+    {en:'deliberate', cn:'故意的；深思熟虑的', pos:'adj./v.', ph:'dɪˈlɪbərət', ex:'It was a deliberate lie.'},
+    {en:'demonstrate', cn:'证明；演示', pos:'v.', ph:'ˈdemənstreɪt', ex:'Let me demonstrate how it works.'},
+    {en:'denote', cn:'表示；意指', pos:'v.', ph:'dɪˈnəʊt', ex:'The sign denotes danger.'},
+    {en:'deprive', cn:'剥夺', pos:'v.', ph:'dɪˈpraɪv', ex:'They were deprived of food.'},
+    {en:'derive', cn:'获得；起源于', pos:'v.', ph:'dɪˈraɪv', ex:'The word derives from Latin.'},
+    {en:'descend', cn:'下降；下来', pos:'v.', ph:'dɪˈsend', ex:'The plane began to descend.'},
+    {en:'desperate', cn:'绝望的；不顾一切的', pos:'adj.', ph:'ˈdespərət', ex:'He made a desperate attempt.'},
+    {en:'destination', cn:'目的地', pos:'n.', ph:'ˌdestɪˈneɪʃn', ex:'We finally reached our destination.'},
+    {en:'deteriorate', cn:'恶化', pos:'v.', ph:'dɪˈtɪəriəreɪt', ex:'His health deteriorated rapidly.'},
+    {en:'devise', cn:'设计；发明', pos:'v.', ph:'dɪˈvaɪz', ex:'They devised a new plan.'},
+    {en:'diagnose', cn:'诊断', pos:'v.', ph:'ˈdaɪəɡnəʊz', ex:'The doctor diagnosed the disease.'},
+    {en:'diminish', cn:'减少；削弱', pos:'v.', ph:'dɪˈmɪnɪʃ', ex:'His influence diminished.'},
+    {en:'discipline', cn:'纪律；学科', pos:'n.', ph:'ˈdɪsəplɪn', ex:'Students must follow school discipline.'},
+    {en:'enhance', cn:'增强；提高', pos:'v.', ph:'ɪnˈhɑːns', ex:'Exercise enhances your mood.'},
+    {en:'promote', cn:'促进；提升', pos:'v.', ph:'prəˈməʊt', ex:'The ad promotes the new product.'},
+    {en:'elastic', cn:'有弹性的；灵活的', pos:'adj.', ph:'ɪˈlæstɪk', ex:'Rubber bands are elastic.'},
+    {en:'elevate', cn:'提升；举起', pos:'v.', ph:'ˈelɪveɪt', ex:'Reading elevates the mind.'},
+    {en:'eliminate', cn:'消除；淘汰', pos:'v.', ph:'ɪˈlɪmɪneɪt', ex:'We must eliminate waste.'},
+    {en:'embarrass', cn:'使尴尬', pos:'v.', ph:'ɪmˈbærəs', ex:'The question embarrassed him.'},
+    {en:'embrace', cn:'拥抱；欣然接受', pos:'v.', ph:'ɪmˈbreɪs', ex:'She embraced her old friend.'},
+    {en:'emerge', cn:'出现；浮现', pos:'v.', ph:'ɪˈmɜːdʒ', ex:'New ideas emerge every day.'},
+    {en:'emit', cn:'发出；排放', pos:'v.', ph:'ɪˈmɪt', ex:'The factory emits smoke.'},
+    {en:'emphasis', cn:'强调；重点', pos:'n.', ph:'ˈemfəsɪs', ex:'The course puts emphasis on practice.'},
+    {en:'employ', cn:'雇用；使用', pos:'v.', ph:'ɪmˈplɔɪ', ex:'The firm employs 200 people.'},
+    {en:'enable', cn:'使能够', pos:'v.', ph:'ɪˈneɪbl', ex:'The app enables quick payment.'},
+    {en:'enclose', cn:'围住；随信附上', pos:'v.', ph:'ɪnˈkləʊz', ex:'Please enclose your photo.'},
+    {en:'encounter', cn:'遭遇；邂逅', pos:'v./n.', ph:'ɪnˈkaʊntə', ex:'I encountered an old friend.'},
+    {en:'endeavor', cn:'努力；尽力', pos:'n./v.', ph:'ɪnˈdevə', ex:'He made every endeavor to succeed.'},
+    {en:'endorse', cn:'赞同；背书', pos:'v.', ph:'ɪnˈdɔːs', ex:'I endorse this proposal.'},
+    {en:'endure', cn:'忍受；持续', pos:'v.', ph:'ɪnˈdjʊə', ex:'She cannot endure the pain.'},
+    {en:'enforce', cn:'执行；强制', pos:'v.', ph:'ɪnˈfɔːs', ex:'The police enforce the law.'},
+    {en:'engage', cn:'从事；吸引', pos:'v.', ph:'ɪnˈɡeɪdʒ', ex:'He engaged in deep thought.'},
+    {en:'enlighten', cn:'启发；启蒙', pos:'v.', ph:'ɪnˈlaɪtn', ex:'The book enlightened me.'},
+    {en:'enormous', cn:'巨大的', pos:'adj.', ph:'ɪˈnɔːməs', ex:'They spent an enormous amount of money.'},
+    {en:'ensure', cn:'确保', pos:'v.', ph:'ɪnˈʃʊə', ex:'Please ensure the door is locked.'},
+    {en:'enterprise', cn:'企业；事业', pos:'n.', ph:'ˈentəpraɪz', ex:'He runs a small enterprise.'},
+    {en:'enthusiasm', cn:'热情', pos:'n.', ph:'ɪnˈθjuːziæzəm', ex:'She shows great enthusiasm for music.'},
+    {en:'entitle', cn:'使有资格；给…命名', pos:'v.', ph:'ɪnˈtaɪtl', ex:'This ticket entitles you to a free drink.'},
+    {en:'equivalent', cn:'相等的；等价物', pos:'adj./n.', ph:'ɪˈkwɪvələnt', ex:'A mile is equivalent to 1.6 kilometers.'},
+    {en:'essential', cn:'必不可少的', pos:'adj.', ph:'ɪˈsenʃl', ex:'Water is essential to life.'},
+    {en:'establish', cn:'建立；确立', pos:'v.', ph:'ɪˈstæblɪʃ', ex:'The company was established in 2000.'},
+    {en:'estimate', cn:'估计', pos:'v./n.', ph:'ˈestɪmeɪt', ex:'We estimate the cost at 5,000 dollars.'},
+    {en:'evaluate', cn:'评价；评估', pos:'v.', ph:'ɪˈvæljueɪt', ex:'Teachers evaluate students fairly.'},
+    {en:'evaporate', cn:'蒸发', pos:'v.', ph:'ɪˈvæpəreɪt', ex:'The water evaporated quickly.'},
+    {en:'evident', cn:'明显的', pos:'adj.', ph:'ˈevɪdənt', ex:'It is evident that he is tired.'},
+    {en:'exaggerate', cn:'夸大', pos:'v.', ph:'ɪɡˈzædʒəreɪt', ex:"Don't exaggerate the problem."},
+    {en:'exceed', cn:'超过', pos:'v.', ph:'ɪkˈsiːd', ex:'The cost exceeds our budget.'},
+    {en:'excessive', cn:'过度的', pos:'adj.', ph:'ɪkˈsesɪv', ex:'Excessive drinking harms health.'},
+    {en:'exclude', cn:'排除', pos:'v.', ph:'ɪkˈskluːd', ex:'The price excludes tax.'},
+    {en:'execute', cn:'执行；处决', pos:'v.', ph:'ˈeksɪkjuːt', ex:'The plan was executed smoothly.'},
+    {en:'exert', cn:'施加；运用', pos:'v.', ph:'ɪɡˈzɜːt', ex:'He exerted great influence.'},
+    {en:'exhaust', cn:'使精疲力尽；耗尽', pos:'v.', ph:'ɪɡˈzɔːst', ex:'The long walk exhausted me.'},
+    {en:'expand', cn:'扩大；扩展', pos:'v.', ph:'ɪkˈspænd', ex:'The city is expanding rapidly.'},
+    {en:'expenditure', cn:'支出；花费', pos:'n.', ph:'ɪkˈspendɪtʃə', ex:'The expenditure on research increased.'},
+    {en:'explicit', cn:'明确的；直率的', pos:'adj.', ph:'ɪkˈsplɪsɪt', ex:'She gave explicit instructions.'},
+    {en:'exploit', cn:'开发；剥削', pos:'v.', ph:'ɪkˈsplɔɪt', ex:'We should exploit solar energy.'},
+    {en:'expose', cn:'暴露；揭露', pos:'v.', ph:'ɪkˈspəʊz', ex:'The report exposed the truth.'},
+    {en:'extend', cn:'延伸；扩展', pos:'v.', ph:'ɪkˈstend', ex:'We extended the meeting by an hour.'},
+    {en:'fabricate', cn:'捏造；制造', pos:'v.', ph:'ˈfæbrɪkeɪt', ex:'He fabricated the whole story.'},
+    {en:'facilitate', cn:'促进；使便利', pos:'v.', ph:'fəˈsɪlɪteɪt', ex:'The new system facilitates our work.'},
+    {en:'fade', cn:'褪色；逐渐消失', pos:'v.', ph:'feɪd', ex:'The colors faded in the sun.'},
+    {en:'fatigue', cn:'疲劳', pos:'n.', ph:'fəˈtiːɡ', ex:'He was overcome by fatigue.'},
+    {en:'feasible', cn:'可行的', pos:'adj.', ph:'ˈfiːzəbl', ex:'The plan seems feasible.'},
+    {en:'fluctuate', cn:'波动', pos:'v.', ph:'ˈflʌktʃueɪt', ex:'Prices fluctuate daily.'},
+    {en:'forbid', cn:'禁止', pos:'v.', ph:'fəˈbɪd', ex:'The law forbids smoking here.'},
+    {en:'forecast', cn:'预报', pos:'n./v.', ph:'ˈfɔːkɑːst', ex:'The forecast says rain tomorrow.'},
+    {en:'foundation', cn:'基础；基金会', pos:'n.', ph:'faʊnˈdeɪʃn', ex:'The report laid a solid foundation.'},
+    {en:'fragile', cn:'脆弱的', pos:'adj.', ph:'ˈfrædʒaɪl', ex:'Be careful with the fragile glass.'},
+    {en:'frequent', cn:'频繁的', pos:'adj.', ph:'ˈfriːkwənt', ex:'He is a frequent visitor.'},
+    {en:'frustrate', cn:'使沮丧；挫败', pos:'v.', ph:'frʌˈstreɪt', ex:'The delay frustrated everyone.'},
+    {en:'fulfill', cn:'实现；履行', pos:'v.', ph:'fʊlˈfɪl', ex:'She fulfilled her dream.'},
+    {en:'fundamental', cn:'基本的；根本的', pos:'adj.', ph:'ˌfʌndəˈmentl', ex:'Freedom is a fundamental right.'},
+    {en:'generate', cn:'产生；生成', pos:'v.', ph:'ˈdʒenəreɪt', ex:'The wind generates electricity.'},
+    {en:'genuine', cn:'真正的；真诚的', pos:'adj.', ph:'ˈdʒenjuɪn', ex:'This is a genuine diamond.'},
+    {en:'gesture', cn:'手势', pos:'n./v.', ph:'ˈdʒestʃə', ex:'He made a friendly gesture.'},
+    {en:'glamour', cn:'魅力', pos:'n.', ph:'ˈɡlæmə', ex:'The city is full of glamour.'},
+    {en:'glimpse', cn:'一瞥', pos:'n./v.', ph:'ɡlɪmps', ex:'I caught a glimpse of the sea.'},
+    {en:'gradual', cn:'逐渐的', pos:'adj.', ph:'ˈɡrædʒuəl', ex:'There was a gradual change in weather.'},
+    {en:'grant', cn:'授予；拨款', pos:'v./n.', ph:'ɡrɑːnt', ex:'The government granted them funds.'},
+    {en:'guarantee', cn:'保证', pos:'v./n.', ph:'ˌɡærənˈtiː', ex:'We guarantee quality.'},
+    {en:'hamper', cn:'妨碍', pos:'v.', ph:'ˈhæmpə', ex:'Heavy rain hampered the rescue.'},
+    {en:'hazard', cn:'危险；危害', pos:'n.', ph:'ˈhæzəd', ex:'Smoking is a health hazard.'},
+    {en:'hesitate', cn:'犹豫', pos:'v.', ph:'ˈhezɪteɪt', ex:"Don't hesitate to ask questions."},
+    {en:'highlight', cn:'突出；强调', pos:'v.', ph:'ˈhaɪlaɪt', ex:'The report highlights the risks.'},
+    {en:'hostile', cn:'敌对的', pos:'adj.', ph:'ˈhɒstaɪl', ex:'The crowd was hostile.'},
+    {en:'identical', cn:'相同的', pos:'adj.', ph:'aɪˈdentɪkl', ex:'The twins look identical.'},
+    {en:'identify', cn:'识别；确认', pos:'v.', ph:'aɪˈdentɪfaɪ', ex:'Can you identify the suspect?'},
+    {en:'ignore', cn:'忽视', pos:'v.', ph:'ɪɡˈnɔː', ex:'He ignored my advice.'},
+    {en:'illustrate', cn:'说明；图解', pos:'v.', ph:'ˈɪləstreɪt', ex:'The chart illustrates the trend.'},
+    {en:'imitate', cn:'模仿', pos:'v.', ph:'ˈɪmɪteɪt', ex:'Children imitate their parents.'},
+    {en:'immense', cn:'巨大的', pos:'adj.', ph:'ɪˈmens', ex:'The project requires immense effort.'},
+    {en:'immune', cn:'免疫的；不受影响的', pos:'adj.', ph:'ɪˈmjuːn', ex:'She is immune to the disease.'},
+    {en:'impact', cn:'影响；冲击', pos:'n./v.', ph:'ˈɪmpækt', ex:'The policy had a big impact.'},
+    {en:'implement', cn:'实施', pos:'v.', ph:'ˈɪmplɪment', ex:'We will implement the new rules.'},
+    {en:'impose', cn:'强加；征收', pos:'v.', ph:'ɪmˈpəʊz', ex:'The tax was imposed on imports.'},
+    {en:'incentive', cn:'激励；刺激', pos:'n.', ph:'ɪnˈsentɪv', ex:'Bonus is a good incentive.'},
+    {en:'incline', cn:'倾向；斜坡', pos:'v./n.', ph:'ɪnˈklaɪn', ex:'I incline to the opposite view.'},
+    {en:'incorporate', cn:'合并；包含', pos:'v.', ph:'ɪnˈkɔːpəreɪt', ex:'The plan incorporates new ideas.'},
+    {en:'index', cn:'索引；指数', pos:'n.', ph:'ˈɪndeks', ex:'Check the index of the book.'},
+    {en:'indicate', cn:'表明；指示', pos:'v.', ph:'ˈɪndɪkeɪt', ex:'The sign indicates the exit.'},
+    {en:'indifferent', cn:'冷漠的', pos:'adj.', ph:'ɪnˈdɪfrənt', ex:'He is indifferent to money.'},
+    {en:'indispensable', cn:'不可或缺的', pos:'adj.', ph:'ˌɪndɪˈspensəbl', ex:'A dictionary is indispensable for learning.'},
+    {en:'induce', cn:'引诱；导致', pos:'v.', ph:'ɪnˈdjuːs', ex:'Nothing could induce him to quit.'},
+    {en:'inevitable', cn:'不可避免的', pos:'adj.', ph:'ɪnˈevɪtəbl', ex:'Change is inevitable.'},
+    {en:'infect', cn:'感染', pos:'v.', ph:'ɪnˈfekt', ex:'The wound became infected.'},
+    {en:'infer', cn:'推断', pos:'v.', ph:'ɪnˈfɜː', ex:'We inferred the truth from the data.'},
+    {en:'inflation', cn:'通货膨胀', pos:'n.', ph:'ɪnˈfleɪʃn', ex:'Inflation is rising fast.'},
+    {en:'infrastructure', cn:'基础设施', pos:'n.', ph:'ˈɪnfrəstrʌktʃə', ex:'The city needs better infrastructure.'},
+    {en:'ingenious', cn:'巧妙的；有独创性的', pos:'adj.', ph:'ɪnˈdʒiːniəs', ex:'What an ingenious design!'},
+    {en:'inherit', cn:'继承', pos:'v.', ph:'ɪnˈherɪt', ex:'She inherited the house from her father.'},
+    {en:'inhibit', cn:'抑制；阻止', pos:'v.', ph:'ɪnˈhɪbɪt', ex:'Fear inhibits action.'},
+    {en:'initiate', cn:'发起；开始', pos:'v.', ph:'ɪˈnɪʃieɪt', ex:'They initiated a new project.'},
+    {en:'inject', cn:'注射', pos:'v.', ph:'ɪnˈdʒekt', ex:'The doctor injected the vaccine.'},
+    {en:'innocent', cn:'无辜的；天真的', pos:'adj.', ph:'ˈɪnəsnt', ex:'The prisoner is innocent.'},
+    {en:'inspect', cn:'检查；视察', pos:'v.', ph:'ɪnˈspekt', ex:'The officer inspected the factory.'},
+    {en:'install', cn:'安装；任命', pos:'v.', ph:'ɪnˈstɔːl', ex:'We installed a new system.'},
+    {en:'inspire', cn:'鼓舞；启发', pos:'v.', ph:'ɪnˈspaɪə', ex:'Her story inspires us.'},
+    {en:'instruct', cn:'指导；命令', pos:'v.', ph:'ɪnˈstrʌkt', ex:'He instructed us to wait.'},
+    {en:'insufficient', cn:'不足的', pos:'adj.', ph:'ˌɪnsəˈfɪʃnt', ex:'The evidence is insufficient.'},
+    {en:'integrate', cn:'整合', pos:'v.', ph:'ˈɪntɪɡreɪt', ex:'We should integrate theory with practice.'},
+    {en:'integrity', cn:'正直；完整', pos:'n.', ph:'ɪnˈteɡrəti', ex:'He is a man of integrity.'},
+    {en:'intense', cn:'强烈的', pos:'adj.', ph:'ɪnˈtens', ex:'The heat was intense.'},
+    {en:'interact', cn:'互动', pos:'v.', ph:'ˌɪntərˈækt', ex:'Teachers interact with students.'},
+    {en:'interfere', cn:'干涉', pos:'v.', ph:'ˌɪntəˈfɪə', ex:"Don't interfere in my affairs."},
+    {en:'intermediate', cn:'中间的；中级的', pos:'adj.', ph:'ˌɪntəˈmiːdiət', ex:'This is an intermediate course.'},
+    {en:'internal', cn:'内部的', pos:'adj.', ph:'ɪnˈtɜːnl', ex:'The internal organs are healthy.'},
+    {en:'interpret', cn:'解释；口译', pos:'v.', ph:'ɪnˈtɜːprɪt', ex:'How do you interpret the poem?'},
+    {en:'intervene', cn:'干预', pos:'v.', ph:'ˌɪntəˈviːn', ex:'The police intervened in the fight.'},
+    {en:'invest', cn:'投资', pos:'v.', ph:'ɪnˈvest', ex:'He invested in the stock market.'},
+    {en:'investigate', cn:'调查', pos:'v.', ph:'ɪnˈvestɪɡeɪt', ex:'The police are investigating the case.'},
+    {en:'isolate', cn:'隔离', pos:'v.', ph:'ˈaɪsəleɪt', ex:'The village was isolated by the flood.'},
+    {en:'jeopardize', cn:'危及', pos:'v.', ph:'ˈdʒepədaɪz', ex:'The scandal jeopardized his career.'},
+    {en:'joint', cn:'联合的；关节', pos:'adj./n.', ph:'dʒɔɪnt', ex:'They made a joint effort.'},
+    {en:'justify', cn:'证明…正当', pos:'v.', ph:'ˈdʒʌstɪfaɪ', ex:'Nothing can justify violence.'},
+    {en:'keen', cn:'热衷的；敏锐的', pos:'adj.', ph:'kiːn', ex:'She is keen on sports.'},
+    {en:'label', cn:'标签', pos:'n./v.', ph:'ˈleɪbl', ex:'Read the label carefully.'},
+    {en:'lag', cn:'滞后', pos:'v./n.', ph:'læɡ', ex:'She lags behind in math.'},
+    {en:'launch', cn:'发射；发起', pos:'v.', ph:'lɔːntʃ', ex:'They launched a new product.'},
+    {en:'leak', cn:'泄漏', pos:'v./n.', ph:'liːk', ex:'The pipe is leaking.'},
+    {en:'legislation', cn:'立法；法规', pos:'n.', ph:'ˌledʒɪsˈleɪʃn', ex:'New legislation protects workers.'},
+    {en:'legitimate', cn:'合法的', pos:'adj.', ph:'lɪˈdʒɪtɪmət', ex:'Is this a legitimate business?'},
+    {en:'liability', cn:'责任；负债', pos:'n.', ph:'ˌlaɪəˈbɪləti', ex:'He accepted liability for the damage.'},
+    {en:'liberal', cn:'自由的；开明的', pos:'adj.', ph:'ˈlɪbərəl', ex:'He holds liberal views.'},
+    {en:'license', cn:'执照；许可', pos:'n./v.', ph:'ˈlaɪsns', ex:'You need a license to drive.'},
+    {en:'likewise', cn:'同样地', pos:'adv.', ph:'ˈlaɪkwaɪz', ex:'He smiled, and I did likewise.'},
+    {en:'limitation', cn:'限制；局限', pos:'n.', ph:'ˌlɪmɪˈteɪʃn', ex:'Every method has its limitations.'},
+    {en:'linger', cn:'逗留；徘徊', pos:'v.', ph:'ˈlɪŋɡə', ex:'The smell lingered in the room.'},
+    {en:'literacy', cn:'读写能力', pos:'n.', ph:'ˈlɪtərəsi', ex:'Literacy rate is rising.'},
+    {en:'lobby', cn:'游说；大厅', pos:'v./n.', ph:'ˈlɒbi', ex:'They lobbied for the new law.'},
+    {en:'magnify', cn:'放大；夸大', pos:'v.', ph:'ˈmæɡnɪfaɪ', ex:'The microscope magnifies cells.'},
+    {en:'maintain', cn:'维持；保养', pos:'v.', ph:'meɪnˈteɪn', ex:'It is hard to maintain the machine.'},
+    {en:'mandate', cn:'授权；命令', pos:'n./v.', ph:'ˈmændeɪt', ex:'The election gave him a mandate.'},
+    {en:'manipulate', cn:'操纵', pos:'v.', ph:'məˈnɪpjuleɪt', ex:'He manipulated the data.'},
+    {en:'margin', cn:'边缘；利润', pos:'n.', ph:'ˈmɑːdʒɪn', ex:'The margin of profit is small.'},
+    {en:'mature', cn:'成熟的', pos:'adj./v.', ph:'məˈtʃʊə', ex:'She is mature for her age.'},
+    {en:'notion', cn:'概念；想法', pos:'n.', ph:'ˈnəʊʃn', ex:'He has a clear notion of the plan.'},
+    {en:'nourish', cn:'滋养；养育', pos:'v.', ph:'ˈnʌrɪʃ', ex:'Good food nourishes the body.'},
+    {en:'numerous', cn:'许多的', pos:'adj.', ph:'ˈnjuːmərəs', ex:'She has numerous friends.'},
+    {en:'objective', cn:'客观的；目标', pos:'adj./n.', ph:'əbˈdʒektɪv', ex:'The test is not objective.'},
+    {en:'oblige', cn:'迫使；施恩于', pos:'v.', ph:'əˈblaɪdʒ', ex:'The law obliges parents to send children to school.'},
+    {en:'obscure', cn:'模糊的；使晦涩', pos:'adj./v.', ph:'əbˈskjʊə', ex:'The meaning of the poem is obscure.'},
+    {en:'observe', cn:'观察；遵守', pos:'v.', ph:'əbˈzɜːv', ex:'We observed the stars at night.'},
+    {en:'obstacle', cn:'障碍', pos:'n.', ph:'ˈɒbstəkl', ex:'Fear is an obstacle to success.'},
+    {en:'occupy', cn:'占据；占用', pos:'v.', ph:'ˈɒkjupaɪ', ex:'The building occupies a whole block.'},
+    {en:'occur', cn:'发生；出现', pos:'v.', ph:'əˈkɜː', ex:'The accident occurred at midnight.'},
+    {en:'offend', cn:'冒犯', pos:'v.', ph:'əˈfend', ex:'His words offended her.'},
+    {en:'offset', cn:'抵消', pos:'v./n.', ph:'ˈɒfset', ex:'The gains offset the losses.'},
+    {en:'omit', cn:'省略；遗漏', pos:'v.', ph:'əˈmɪt', ex:"Don't omit any details."},
+    {en:'ongoing', cn:'持续进行的', pos:'adj.', ph:'ˈɒnɡəʊɪŋ', ex:'The ongoing talks are important.'},
+    {en:'opponent', cn:'对手', pos:'n.', ph:'əˈpəʊnənt', ex:'He defeated his opponent easily.'},
+    {en:'oppose', cn:'反对', pos:'v.', ph:'əˈpəʊz', ex:'Many people oppose the plan.'},
+    {en:'optimistic', cn:'乐观的', pos:'adj.', ph:'ˌɒptɪˈmɪstɪk', ex:'She is optimistic about the future.'},
+    {en:'origin', cn:'起源', pos:'n.', ph:'ˈɒrɪdʒɪn', ex:'The origin of the word is Latin.'},
+    {en:'outbreak', cn:'爆发', pos:'n.', ph:'ˈaʊtbreɪk', ex:'The outbreak of the disease alarmed us.'},
+    {en:'outlook', cn:'观点；前景', pos:'n.', ph:'ˈaʊtlʊk', ex:'He has a positive outlook on life.'},
+    {en:'outweigh', cn:'比…更重要', pos:'v.', ph:'ˌaʊtˈweɪ', ex:'The benefits outweigh the risks.'},
+    {en:'overall', cn:'总体的', pos:'adj./adv.', ph:'ˌəʊvərˈɔːl', ex:'The overall situation is good.'},
+    {en:'pace', cn:'速度；节奏', pos:'n.', ph:'peɪs', ex:'He walked at a fast pace.'},
+    {en:'parallel', cn:'平行的', pos:'adj.', ph:'ˈpærəlel', ex:'The two roads are parallel.'},
+    {en:'participate', cn:'参与', pos:'v.', ph:'pɑːˈtɪsɪpeɪt', ex:'All students participated in the game.'},
+    {en:'perceive', cn:'感知；察觉', pos:'v.', ph:'pəˈsiːv', ex:'We perceive the world through our senses.'},
+    {en:'permanent', cn:'永久的', pos:'adj.', ph:'ˈpɜːmənənt', ex:'This is her permanent address.'},
+    {en:'permit', cn:'允许', pos:'v.', ph:'pəˈmɪt', ex:'Smoking is not permitted here.'},
+    {en:'persist', cn:'坚持；持续', pos:'v.', ph:'pəˈsɪst', ex:'If you persist, you will succeed.'},
+    {en:'perspective', cn:'观点；视角', pos:'n.', ph:'pəˈspektɪv', ex:'We should view it from another perspective.'},
+    {en:'pessimistic', cn:'悲观的', pos:'adj.', ph:'ˌpesɪˈmɪstɪk', ex:'He is pessimistic about the result.'},
+    {en:'pledge', cn:'保证；誓言', pos:'n./v.', ph:'pledʒ', ex:'He made a pledge to help.'},
+    {en:'portion', cn:'部分；一份', pos:'n.', ph:'ˈpɔːʃn', ex:'A large portion of the budget went to education.'},
+    {en:'pose', cn:'造成；摆姿势', pos:'v.', ph:'pəʊz', ex:'The new law poses a challenge.'},
+    {en:'positive', cn:'积极的；肯定的', pos:'adj.', ph:'ˈpɒzətɪv', ex:'Keep a positive attitude.'},
+    {en:'potential', cn:'潜在的；潜力', pos:'adj./n.', ph:'pəˈtenʃl', ex:'The idea has great potential.'},
+    {en:'pragmatic', cn:'务实的', pos:'adj.', ph:'præɡˈmætɪk', ex:'We need a pragmatic solution.'},
+    {en:'precise', cn:'精确的', pos:'adj.', ph:'prɪˈsaɪs', ex:'The data must be precise.'},
+    {en:'predict', cn:'预测', pos:'v.', ph:'prɪˈdɪkt', ex:'It is hard to predict the weather.'},
+    {en:'prevail', cn:'盛行；获胜', pos:'v.', ph:'prɪˈveɪl', ex:'Justice will prevail.'},
+    {en:'priority', cn:'优先事项', pos:'n.', ph:'praɪˈɒrəti', ex:'Safety is our top priority.'},
+    {en:'procedure', cn:'程序；步骤', pos:'n.', ph:'prəˈsiːdʒə', ex:'Follow the standard procedure.'},
+    {en:'proceed', cn:'继续进行', pos:'v.', ph:'prəˈsiːd', ex:'The meeting proceeded as planned.'},
+    {en:'profound', cn:'深刻的', pos:'adj.', ph:'prəˈfaʊnd', ex:'The book has a profound influence.'},
+    {en:'prohibit', cn:'禁止', pos:'v.', ph:'prəˈhɪbɪt', ex:'The rule prohibits smoking.'},
+    {en:'prominent', cn:'突出的；杰出的', pos:'adj.', ph:'ˈprɒmɪnənt', ex:'She is a prominent scientist.'},
+    {en:'prompt', cn:'促使；迅速的', pos:'v./adj.', ph:'prɒmpt', ex:'The news prompted a debate.'},
+    {en:'prospect', cn:'前景', pos:'n.', ph:'ˈprɒspekt', ex:'The prospect of success excited him.'},
+    {en:'prosperity', cn:'繁荣', pos:'n.', ph:'prɒˈsperəti', ex:'The city enjoyed great prosperity.'},
+    {en:'protest', cn:'抗议', pos:'n./v.', ph:'ˈprəʊtest', ex:'Workers protested against the policy.'},
+    {en:'provoke', cn:'激怒；引发', pos:'v.', ph:'prəˈvəʊk', ex:'His joke provoked laughter.'},
+    {en:'pursue', cn:'追求；从事', pos:'v.', ph:'pəˈsjuː', ex:'She pursues her dream.'},
+    {en:'qualify', cn:'使有资格', pos:'v.', ph:'ˈkwɒlɪfaɪ', ex:'The training will qualify you for the job.'},
+    {en:'quantity', cn:'数量', pos:'n.', ph:'ˈkwɒntəti', ex:'Quality matters more than quantity.'},
+    {en:'quote', cn:'引用', pos:'v./n.', ph:'kwəʊt', ex:'She quoted a famous saying.'},
+    {en:'radical', cn:'激进的；根本的', pos:'adj.', ph:'ˈrædɪkl', ex:'He proposed radical reforms.'},
+    {en:'random', cn:'随机的', pos:'adj.', ph:'ˈrændəm', ex:'The choice was completely random.'},
+    {en:'range', cn:'范围', pos:'n./v.', ph:'reɪndʒ', ex:'The price ranges from 10 to 50 dollars.'},
+    {en:'ratio', cn:'比率', pos:'n.', ph:'ˈreɪʃiəʊ', ex:'The ratio of boys to girls is two to one.'},
+    {en:'rational', cn:'理性的', pos:'adj.', ph:'ˈræʃnəl', ex:'Be rational about the problem.'},
+    {en:'recall', cn:'回忆；召回', pos:'v.', ph:'rɪˈkɔːl', ex:'I cannot recall his name.'},
+    {en:'reckon', cn:'认为；估算', pos:'v.', ph:'ˈrekən', ex:'I reckon the cost at 200 dollars.'},
+    {en:'recommend', cn:'推荐', pos:'v.', ph:'ˌrekəˈmend', ex:'I recommend this book.'},
+    {en:'reconcile', cn:'调和；和解', pos:'v.', ph:'ˈrekənsaɪl', ex:'It is hard to reconcile the two views.'},
+    {en:'recruit', cn:'招募；新兵', pos:'v./n.', ph:'rɪˈkruːt', ex:'The company recruited new staff.'},
+    {en:'refine', cn:'精炼；改进', pos:'v.', ph:'rɪˈfaɪn', ex:'The method needs to be refined.'},
+    {en:'reflect', cn:'反映；反思', pos:'v.', ph:'rɪˈflekt', ex:'His words reflect his attitude.'},
+    {en:'reform', cn:'改革', pos:'n./v.', ph:'rɪˈfɔːm', ex:'The government carried out reforms.'},
+    {en:'refrain', cn:'克制', pos:'v.', ph:'rɪˈfreɪn', ex:'Please refrain from smoking.'},
+    {en:'regardless', cn:'无论如何', pos:'adv.', ph:'rɪˈɡɑːdləs', ex:'We will go regardless of the weather.'},
+    {en:'regulate', cn:'管理；调节', pos:'v.', ph:'ˈreɡjuleɪt', ex:'The government regulates the market.'},
+    {en:'reinforce', cn:'加强', pos:'v.', ph:'ˌriːɪnˈfɔːs', ex:'The walls were reinforced with steel.'},
+    {en:'reject', cn:'拒绝；排斥', pos:'v.', ph:'rɪˈdʒekt', ex:'She rejected his offer.'},
+    {en:'relevant', cn:'相关的', pos:'adj.', ph:'ˈreləvənt', ex:'The article is relevant to our topic.'},
+    {en:'relieve', cn:'缓解；减轻', pos:'v.', ph:'rɪˈliːv', ex:'The medicine relieved my pain.'},
+    {en:'reluctant', cn:'不情愿的', pos:'adj.', ph:'rɪˈlʌktənt', ex:'He was reluctant to leave.'},
+    {en:'remedy', cn:'补救；疗法', pos:'n./v.', ph:'ˈremədi', ex:'There is no easy remedy for the problem.'},
+    {en:'remote', cn:'遥远的', pos:'adj.', ph:'rɪˈməʊt', ex:'The village is remote.'},
+    {en:'render', cn:'使成为；提供', pos:'v.', ph:'ˈrendə', ex:'The news rendered him speechless.'},
+    {en:'renew', cn:'更新；续期', pos:'v.', ph:'rɪˈnjuː', ex:'Remember to renew your passport.'},
+    {en:'reproduce', cn:'繁殖；复制', pos:'v.', ph:'ˌriːprəˈdjuːs', ex:'The photo reproduces well.'},
+    {en:'reputation', cn:'名声', pos:'n.', ph:'ˌrepjuˈteɪʃn', ex:'He has a good reputation.'},
+    {en:'resemble', cn:'像', pos:'v.', ph:'rɪˈzembl', ex:'She resembles her mother.'},
+    {en:'reserve', cn:'预订；储备', pos:'v./n.', ph:'rɪˈzɜːv', ex:'I reserved a table for two.'},
+    {en:'resist', cn:'抵抗', pos:'v.', ph:'rɪˈzɪst', ex:'She cannot resist chocolate.'},
+    {en:'resolve', cn:'解决；决心', pos:'v.', ph:'rɪˈzɒlv', ex:'We must resolve the conflict.'},
+    {en:'resort', cn:'度假胜地；求助', pos:'n./v.', ph:'rɪˈzɔːt', ex:'They resorted to force.'},
+    {en:'respond', cn:'回应', pos:'v.', ph:'rɪˈspɒnd', ex:'He responded to my question.'},
+    {en:'restore', cn:'恢复', pos:'v.', ph:'rɪˈstɔː', ex:'The painting was restored.'},
+    {en:'restrain', cn:'抑制；约束', pos:'v.', ph:'rɪˈstreɪn', ex:'He restrained his anger.'},
+    {en:'restrict', cn:'限制', pos:'v.', ph:'rɪˈstrɪkt', ex:'Speed is restricted on this road.'},
+    {en:'retain', cn:'保留', pos:'v.', ph:'rɪˈteɪn', ex:'She retained her memory.'},
+    {en:'reveal', cn:'揭示', pos:'v.', ph:'rɪˈviːl', ex:'The test revealed the truth.'},
+    {en:'revenue', cn:'收入', pos:'n.', ph:'ˈrevənjuː', ex:"The company's revenue increased."},
+    {en:'reverse', cn:'逆转；相反', pos:'v./n.', ph:'rɪˈvɜːs', ex:'The order was reversed.'},
+    {en:'revive', cn:'复兴；复苏', pos:'v.', ph:'rɪˈvaɪv', ex:'The economy is reviving.'},
+    {en:'rigid', cn:'僵硬的；严格的', pos:'adj.', ph:'ˈrɪdʒɪd', ex:'The rules are too rigid.'},
+    {en:'rigorous', cn:'严格的；严谨的', pos:'adj.', ph:'ˈrɪɡərəs', ex:'The training is rigorous.'},
+    {en:'routine', cn:'常规', pos:'n./adj.', ph:'ruːˈtiːn', ex:'Exercise is part of my routine.'},
+    {en:'rural', cn:'农村的', pos:'adj.', ph:'ˈrʊərəl', ex:'He grew up in a rural area.'},
+    {en:'sanction', cn:'制裁；批准', pos:'n./v.', ph:'ˈsæŋkʃn', ex:'The UN imposed sanctions.'},
+    {en:'scarce', cn:'稀缺的', pos:'adj.', ph:'skeəs', ex:'Clean water is scarce.'},
+    {en:'scenario', cn:'情景；方案', pos:'n.', ph:'səˈnɑːriəʊ', ex:'Imagine the worst scenario.'},
+    {en:'schedule', cn:'日程安排', pos:'n./v.', ph:'ˈʃedjuːl', ex:'The meeting is on schedule.'},
+    {en:'scheme', cn:'计划；阴谋', pos:'n.', ph:'skiːm', ex:'They carried out a secret scheme.'},
+    {en:'sector', cn:'部门；行业', pos:'n.', ph:'ˈsektə', ex:'She works in the service sector.'},
+    {en:'secure', cn:'安全的；获得', pos:'adj./v.', ph:'sɪˈkjʊə', ex:'The data is secure.'},
+    {en:'severe', cn:'严重的', pos:'adj.', ph:'sɪˈvɪə', ex:'The storm caused severe damage.'},
+    {en:'significance', cn:'重要性', pos:'n.', ph:'sɪɡˈnɪfɪkəns', ex:'The discovery has great significance.'},
+    {en:'simulate', cn:'模拟', pos:'v.', ph:'ˈsɪmjuleɪt', ex:'The program simulates a flight.'},
+    {en:'skeptical', cn:'怀疑的', pos:'adj.', ph:'ˈskeptɪkl', ex:'I am skeptical about his promise.'},
+    {en:'slender', cn:'苗条的；细长的', pos:'adj.', ph:'ˈslendə', ex:'She has a slender figure.'},
+    {en:'soar', cn:'飙升', pos:'v.', ph:'sɔː', ex:'Prices soared last year.'},
+    {en:'sole', cn:'唯一的', pos:'adj.', ph:'səʊl', ex:'He is the sole owner.'},
+    {en:'sophisticated', cn:'复杂的；精密的', pos:'adj.', ph:'səˈfɪstɪkeɪtɪd', ex:'The device is sophisticated.'},
+    {en:'source', cn:'来源', pos:'n.', ph:'sɔːs', ex:'The sun is the main source of energy.'},
+    {en:'specific', cn:'具体的', pos:'adj.', ph:'spəˈsɪfɪk', ex:'Give me a specific example.'},
+    {en:'speculate', cn:'推测', pos:'v.', ph:'ˈspekjuleɪt', ex:'We can only speculate about the cause.'},
+    {en:'sponsor', cn:'赞助', pos:'n./v.', ph:'ˈspɒnsə', ex:'The company sponsored the event.'},
+    {en:'stable', cn:'稳定的', pos:'adj.', ph:'ˈsteɪbl', ex:'The patient is in stable condition.'},
+    {en:'stake', cn:'股份；风险', pos:'n.', ph:'steɪk', ex:'He has a big stake in the company.'},
+    {en:'stimulate', cn:'刺激；激励', pos:'v.', ph:'ˈstɪmjuleɪt', ex:'The policy stimulated economic growth.'},
+    {en:'strategy', cn:'战略', pos:'n.', ph:'ˈstrætədʒi', ex:'We need a new strategy.'},
+    {en:'strengthen', cn:'加强', pos:'v.', ph:'ˈstreŋθn', ex:'Exercise strengthens the body.'},
+    {en:'strive', cn:'努力；奋斗', pos:'v.', ph:'straɪv', ex:'We strive for excellence.'},
+    {en:'structure', cn:'结构', pos:'n.', ph:'ˈstrʌktʃə', ex:'The building has a steel structure.'},
+    {en:'submit', cn:'提交；屈服', pos:'v.', ph:'səbˈmɪt', ex:'Submit your report on time.'},
+    {en:'subsequent', cn:'随后的', pos:'adj.', ph:'ˈsʌbsɪkwənt', ex:'The subsequent events proved him right.'},
+    {en:'substantial', cn:'大量的；实质的', pos:'adj.', ph:'səbˈstænʃl', ex:'He made substantial progress.'},
+    {en:'substitute', cn:'替代品', pos:'n./v.', ph:'ˈsʌbstɪtjuːt', ex:'Nothing can substitute for practice.'},
+    {en:'subtle', cn:'微妙的', pos:'adj.', ph:'ˈsʌtl', ex:'There is a subtle difference.'},
+    {en:'sufficient', cn:'足够的', pos:'adj.', ph:'səˈfɪʃnt', ex:'The food is sufficient for ten people.'},
+    {en:'supplement', cn:'补充', pos:'n./v.', ph:'ˈsʌplɪmənt', ex:'Fish oil is a good supplement.'},
+    {en:'surpass', cn:'超过', pos:'v.', ph:'səˈpɑːs', ex:'His score surpassed all records.'},
+    {en:'survive', cn:'幸存', pos:'v.', ph:'səˈvaɪv', ex:'Only a few plants survived the drought.'},
+    {en:'suspend', cn:'暂停；悬挂', pos:'v.', ph:'səˈspend', ex:'The flight was suspended.'},
+    {en:'sustain', cn:'维持；支撑', pos:'v.', ph:'səˈsteɪn', ex:'The soil cannot sustain so many crops.'},
+    {en:'symbol', cn:'象征', pos:'n.', ph:'ˈsɪmbl', ex:'The dove is a symbol of peace.'},
+    {en:'symptom', cn:'症状', pos:'n.', ph:'ˈsɪmptəm', ex:'Fever is a symptom of illness.'},
+    {en:'tackle', cn:'处理', pos:'v.', ph:'ˈtækl', ex:'We must tackle the problem now.'},
+    {en:'temporary', cn:'临时的', pos:'adj.', ph:'ˈtemprəri', ex:'This is a temporary job.'},
+    {en:'tendency', cn:'趋势', pos:'n.', ph:'ˈtendənsi', ex:'He has a tendency to exaggerate.'},
+    {en:'terminate', cn:'终止', pos:'v.', ph:'ˈtɜːmɪneɪt', ex:'The contract was terminated.'},
+    {en:'territory', cn:'领土；领域', pos:'n.', ph:'ˈterətri', ex:'The bird defends its territory.'},
+    {en:'thrive', cn:'兴旺', pos:'v.', ph:'θraɪv', ex:'Small businesses thrive here.'},
+    {en:'tolerate', cn:'容忍', pos:'v.', ph:'ˈtɒləreɪt', ex:'I cannot tolerate the noise.'},
+    {en:'trace', cn:'追踪；痕迹', pos:'v./n.', ph:'treɪs', ex:'The police traced the suspect.'},
+    {en:'transition', cn:'过渡', pos:'n.', ph:'trænˈzɪʃn', ex:'The country is in transition.'},
+    {en:'transmit', cn:'传输；传播', pos:'v.', ph:'trænzˈmɪt', ex:'The signal is transmitted by satellite.'},
+    {en:'transparent', cn:'透明的', pos:'adj.', ph:'trænsˈpærənt', ex:'The water is transparent.'},
+    {en:'tremendous', cn:'巨大的', pos:'adj.', ph:'trəˈmendəs', ex:'The project was a tremendous success.'},
+    {en:'trigger', cn:'触发', pos:'v./n.', ph:'ˈtrɪɡə', ex:'The news triggered a panic.'},
+    {en:'triumph', cn:'胜利', pos:'n./v.', ph:'ˈtraɪəmf', ex:'The team celebrated their triumph.'},
+    {en:'trivial', cn:'琐碎的', pos:'adj.', ph:'ˈtrɪviəl', ex:"Don't waste time on trivial matters."},
+    {en:'ultimate', cn:'最终的', pos:'adj.', ph:'ˈʌltɪmət', ex:'His ultimate goal is freedom.'},
+    {en:'undergo', cn:'经历', pos:'v.', ph:'ˌʌndəˈɡəʊ', ex:'The city underwent great changes.'},
+    {en:'undermine', cn:'削弱', pos:'v.', ph:'ˌʌndəˈmaɪn', ex:'Doubts undermined his confidence.'},
+    {en:'undertake', cn:'承担；着手', pos:'v.', ph:'ˌʌndəˈteɪk', ex:'She undertook the task willingly.'},
+    {en:'uniform', cn:'统一的；制服', pos:'adj./n.', ph:'ˈjuːnɪfɔːm', ex:'The students wear uniforms.'},
+    {en:'unique', cn:'独特的', pos:'adj.', ph:'juˈniːk', ex:'Every person is unique.'},
+    {en:'universal', cn:'普遍的', pos:'adj.', ph:'ˌjuːnɪˈvɜːsl', ex:'The rule is universal.'},
+    {en:'update', cn:'更新', pos:'v./n.', ph:'ˌʌpˈdeɪt', ex:'Please update your software.'},
+    {en:'upgrade', cn:'升级', pos:'v./n.', ph:'ˌʌpˈɡreɪd', ex:'The system was upgraded.'},
+    {en:'urge', cn:'敦促；强烈要求', pos:'v.', ph:'ɜːdʒ', ex:'I urge you to act now.'},
+    {en:'urgent', cn:'紧急的', pos:'adj.', ph:'ˈɜːdʒənt', ex:'The matter is urgent.'},
+    {en:'utilize', cn:'利用', pos:'v.', ph:'ˈjuːtəlaɪz', ex:'We should utilize every resource.'},
+    {en:'vague', cn:'模糊的', pos:'adj.', ph:'veɪɡ', ex:'His answer was vague.'},
+    {en:'valid', cn:'有效的', pos:'adj.', ph:'ˈvælɪd', ex:'The ticket is valid for three days.'},
+    {en:'vanish', cn:'消失', pos:'v.', ph:'ˈvænɪʃ', ex:'The ship vanished in the fog.'},
+    {en:'vast', cn:'广阔的', pos:'adj.', ph:'vɑːst', ex:'The desert is vast.'},
+    {en:'vehicle', cn:'车辆；媒介', pos:'n.', ph:'ˈviːəkl', ex:'Cars are the main vehicle of transport.'},
+    {en:'venture', cn:'冒险', pos:'n./v.', ph:'ˈventʃə', ex:'The venture failed.'},
+    {en:'verify', cn:'核实', pos:'v.', ph:'ˈverɪfaɪ', ex:'Please verify the facts.'},
+    {en:'versatile', cn:'多才多艺的', pos:'adj.', ph:'ˈvɜːsətaɪl', ex:'He is a versatile actor.'},
+    {en:'version', cn:'版本', pos:'n.', ph:'ˈvɜːʃn', ex:'This is the latest version.'},
+    {en:'viable', cn:'可行的', pos:'adj.', ph:'ˈvaɪəbl', ex:'The plan is not viable.'},
+    {en:'victim', cn:'受害者', pos:'n.', ph:'ˈvɪktɪm', ex:'The victim was rescued.'},
+    {en:'violate', cn:'违反', pos:'v.', ph:'ˈvaɪəleɪt', ex:'He violated the law.'},
+    {en:'virtual', cn:'虚拟的', pos:'adj.', ph:'ˈvɜːtʃuəl', ex:'He met his friends in the virtual world.'},
+    {en:'virtue', cn:'美德', pos:'n.', ph:'ˈvɜːtʃuː', ex:'Honesty is a virtue.'},
+    {en:'visible', cn:'可见的', pos:'adj.', ph:'ˈvɪzəbl', ex:'The mountain is visible from here.'},
+    {en:'vital', cn:'至关重要的', pos:'adj.', ph:'ˈvaɪtl', ex:'Water is vital to life.'},
+    {en:'vivid', cn:'生动的', pos:'adj.', ph:'ˈvɪvɪd', ex:'She has a vivid memory of the trip.'},
+    {en:'volunteer', cn:'志愿者', pos:'n./v.', ph:'ˌvɒlənˈtɪə', ex:'She volunteers at the hospital.'},
+    {en:'vulnerable', cn:'脆弱的', pos:'adj.', ph:'ˈvʌlnərəbl', ex:'Old people are vulnerable to disease.'},
+    {en:'welfare', cn:'福利', pos:'n.', ph:'ˈwelfeə', ex:'The state looks after people welfare.'},
+    {en:'whereas', cn:'然而', pos:'conj.', ph:'ˌweərˈæz', ex:'He is rich, whereas I am poor.'},
+    {en:'widespread', cn:'广泛的', pos:'adj.', ph:'ˈwaɪdspred', ex:'The disease is widespread.'},
+    {en:'withstand', cn:'经受住', pos:'v.', ph:'wɪðˈstænd', ex:'The bridge can withstand strong winds.'},
+    {en:'witness', cn:'目击者；见证', pos:'n./v.', ph:'ˈwɪtnəs', ex:'He witnessed the accident.'},
+    {en:'yield', cn:'产出；屈服', pos:'v./n.', ph:'jiːld', ex:'The land yields rich crops.'}
+];
+
+// ================= 数据与状态 =================
+const todayStrFrom = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+const todayStr = () => todayStrFrom(new Date());
+const esc = s => String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+
+function loadWords(){
+    if(localStorage.getItem('cet6words') === null){
+        return PRESET_WORDS.map(w => ({...w, wrong:false, level:0, streak:0}));
+    }
+    return (JSON.parse(localStorage.getItem('cet6words')) || []).map(w => ({
+        en:w.en, cn:w.cn, pos:w.pos || '', ph:w.ph || '', ex:w.ex || '', wrong:!!w.wrong, level:w.level || 0, streak:w.streak || 0
+    }));
+}
+
+let wordList = loadWords();
+let nowIndex = 0;
+let mode = 0; //0英→中，1中→英
+let currentPool = [...wordList];
+let currentWord = null;
+let quizOn = false;
+
+function saveData(){
+    localStorage.setItem('cet6words', JSON.stringify(wordList));
+}
+
+function getStats(){ return JSON.parse(localStorage.getItem('cet6stats')) || []; }
+function saveStats(s){ localStorage.setItem('cet6stats', JSON.stringify(s)); }
+function getCheckin(){ return JSON.parse(localStorage.getItem('cet6checkin')) || []; }
+function saveCheckin(c){ localStorage.setItem('cet6checkin', JSON.stringify(c)); }
+
+// ================= 视图切换 =================
+function showView(v){
+    ['practice','book','stats','cls'].forEach(x => {
+        document.getElementById('view-' + x).style.display = x === v ? 'block' : 'none';
+    });
+    document.querySelectorAll('.tab').forEach(t => t.classList.toggle('on', t.dataset.view === v));
+    if(v === 'book') renderBook();
+    if(v === 'stats') renderStatViews();
+    if(v === 'cls') renderClusters();
+}
+
+// ================= 词库管理 =================
+function parseLines(text){
+    let added = 0;
+    String(text).split(/\r?\n/).forEach(line => {
+        if(!line.trim()) return;
+        const [en, cn, ph, ex, pos] = line.split('|').map(s => s.trim());
+        if(en && cn && !wordList.some(w => w.en === en)){
+            wordList.push({en, cn, pos: pos || '', ph: ph || '', ex: ex || '', wrong:false, level:0, streak:0});
+            added++;
+        }
+    });
+    return added;
+}
+
+function importWords(){
+    const added = parseLines(document.getElementById('wordInput').value);
+    saveData();
+    alert(`成功导入 ${added} 个新单词，当前词库共 ${wordList.length} 个！`);
+    document.getElementById('wordInput').value = '';
+    resetPool();
+    refreshViews();
+}
+
+function importFile(input){
+    const f = input.files[0];
+    if(!f) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+        const added = parseLines(e.target.result);
+        saveData();
+        alert(`备份导入完成，新增 ${added} 个单词！`);
+        resetPool();
+        refreshViews();
+    };
+    reader.readAsText(f, 'utf-8');
+    input.value = '';
+}
+
+function loadPreset(){
+    let added = 0, filled = 0;
+    PRESET_WORDS.forEach(p => {
+        const ex = wordList.find(w => w.en === p.en);
+        if(ex){
+            // 只补空字段，不覆盖用户自定义内容
+            if(!ex.pos && p.pos){ ex.pos = p.pos; filled++; }
+            if(!ex.ph && p.ph){ ex.ph = p.ph; filled++; }
+            if(!ex.ex && p.ex){ ex.ex = p.ex; filled++; }
+        }else{
+            wordList.push({...p, wrong:false, level:0, streak:0});
+            added++;
+        }
+    });
+    saveData();
+    alert(`内置词库载入完成，新增 ${added} 个单词，补齐 ${filled} 处词性/音标/例句，当前共 ${wordList.length} 个！`);
+    resetPool();
+    refreshViews();
+}
+
+function exportWords(){
+    const text = wordList.map(w => [w.en, w.cn, w.ph || '', w.ex || '', w.pos || ''].join('|')).join('\n');
+    const blob = new Blob([text], {type:'text/plain;charset=utf-8'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = '六级词库备份.txt';
+    a.click();
+    URL.revokeObjectURL(a.href);
+}
+
+function clearAll(){
+    if(confirm('确定清空所有单词、错题和进度记录吗？')){
+        wordList = [];
+        currentPool = [];
+        nowIndex = 0;
+        currentWord = null;
+        saveData();
+        document.getElementById('showWord').innerHTML = '词库已清空，去「单词本」导入或载入内置词库';
+        document.getElementById('resultText').innerText = '';
+        document.getElementById('answerInput').value = '';
+        document.getElementById('quizBox').innerHTML = '';
+        document.getElementById('syncBox').style.display = 'none';
+        refreshViews();
+    }
+}
+
+function resetPool(){
+    if(!wordList.length){
+        currentPool = [];
+        nowIndex = 0;
+        document.getElementById('showWord').innerHTML = '先导入或载入单词，开始默写';
+        return;
+    }
+    currentPool = [...wordList];
+    shuffle(currentPool);
+    nowIndex = 0;
+    nextWord();
+}
+
+function refreshViews(){
+    if(document.getElementById('view-book').style.display !== 'none') renderBook();
+    if(document.getElementById('view-stats').style.display !== 'none') renderStatViews();
+    if(document.getElementById('view-cls').style.display !== 'none') renderClusters();
+    renderTodayLine();
+}
+
+// ================= 默写核心 =================
+function shuffle(arr){
+    for(let i = arr.length - 1; i > 0; i--){
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+}
+
+function switchMode(m){
+    mode = m;
+    alert(m === 0 ? '模式切换：看英文默写中文' : '模式切换：看中文默写英文');
+    nextWord();
+}
+
+function pickAll(){
+    currentPool = [...wordList];
+    shuffle(currentPool);
+    nowIndex = 0;
+    nextWord();
+}
+
+function pickWrong(){
+    currentPool = wordList.filter(w => w.wrong);
+    if(!currentPool.length){ alert('暂无错题，继续保持！'); return; }
+    shuffle(currentPool);
+    nowIndex = 0;
+    nextWord();
+}
+
+function pickWeak(){
+    currentPool = wordList.filter(w => (w.level || 0) < 2);
+    if(!currentPool.length){ alert('太棒了，所有单词都已掌握！'); return; }
+    shuffle(currentPool);
+    nowIndex = 0;
+    nextWord();
+}
+
+function nextWord(){
+    if(currentPool.length === 0){
+        currentWord = null;
+        document.getElementById('showWord').innerHTML = '✅ 本轮默写完成';
+        document.getElementById('quizBox').innerHTML = '';
+        return;
+    }
+    const w = currentPool[nowIndex];
+    currentWord = w;
+    const card = document.getElementById('showWord');
+    // 看英文时显示音标+词性；看中文时只显示词性（避免音标剧透拼写）
+    const sub = mode === 0 ? [w.ph, w.pos].filter(Boolean).join(' · ') : w.pos || '';
+    card.innerHTML = esc(mode === 0 ? w.en : w.cn)
+        + (sub ? `<div class="ph">${esc(sub)}</div>` : '');
+    document.getElementById('answerInput').value = '';
+    document.getElementById('resultText').innerText = '';
+    document.getElementById('syncBox').style.display = 'none';
+    if(quizOn) renderQuiz();
+    nowIndex++;
+    if(nowIndex >= currentPool.length) nowIndex = 0;
+}
+
+// 判题：去掉空格、标点，忽略大小写
+function normalize(s){
+    return String(s).toLowerCase().replace(/[^\w\u4e00-\u9fa5]/g, '');
+}
+
+function targetOf(w){ return mode === 0 ? w.cn : w.en; }
+
+function checkAnswer(){
+    if(quizOn) return;
+    const w = currentWord;
+    if(!w){ document.getElementById('resultText').innerText = '请先开始默写'; return; }
+    const userAns = document.getElementById('answerInput').value.trim();
+    const target = targetOf(w);
+    const resDom = document.getElementById('resultText');
+    if(normalize(userAns) === normalize(target)){
+        resDom.className = 'result right';
+        resDom.innerText = `✅ 正确！${w.en}${w.pos ? ' (' + w.pos + ')' : ''} —— ${w.cn}`;
+        markRight(w);
+        recordStat(true);
+    }else{
+        resDom.className = 'result wrong';
+        resDom.innerText = `❌ 错啦！正确答案：${w.pos ? w.pos + ' ' : ''}${target}`;
+        markWrong(w);
+        recordStat(false);
+    }
+    saveData();
+}
+
+function markRight(w){
+    w.wrong = false;
+    w.streak = (w.streak || 0) + 1;
+    if(w.streak >= 3) w.level = 2;
+    else if(w.level < 2) w.level = 1;
+}
+
+function markWrong(w){
+    w.wrong = true;
+    w.streak = 0;
+    w.level = 0;
+}
+
+// ================= 选择题模式 =================
+function toggleQuiz(){
+    quizOn = !quizOn;
+    document.getElementById('quizBtn').innerText = '📝 选择题模式：' + (quizOn ? '开' : '关');
+    document.getElementById('answerInput').style.display = quizOn ? 'none' : 'block';
+    if(quizOn){ if(currentWord) renderQuiz(); }
+    else document.getElementById('quizBox').innerHTML = '';
+}
+
+function renderQuiz(){
+    const w = currentWord;
+    if(!w) return;
+    const dist = wordList.filter(x => x !== w);
+    shuffle(dist);
+    const options = [
+        {t: targetOf(w), pos: mode === 0 ? w.pos : '', ok:true},
+        ...dist.slice(0, 3).map(p => ({t: targetOf(p), pos: mode === 0 ? p.pos : '', ok:false}))
+    ];
+    shuffle(options);
+    window._quizAnswer = options;
+    document.getElementById('quizBox').innerHTML = options.map((o, i) =>
+        `<button class="quiz-opt" id="qo-${i}" onclick="quizPick(${i})">${esc(o.pos ? o.pos + ' ' : '')}${esc(o.t)}</button>`).join('');
+}
+
+function quizPick(i){
+    const opts = window._quizAnswer;
+    const w = currentWord;
+    if(!w) return;
+    opts.forEach((o, j) => {
+        const b = document.getElementById('qo-' + j);
+        b.disabled = true;
+        if(o.ok) b.classList.add('quiz-ok');
+        else if(j === i) b.classList.add('quiz-no');
+    });
+    const resDom = document.getElementById('resultText');
+    if(opts[i].ok){
+        markRight(w);
+        resDom.className = 'result right';
+        resDom.innerText = `✅ 正确！${w.en}${w.pos ? ' (' + w.pos + ')' : ''} —— ${w.cn}`;
+    }else{
+        markWrong(w);
+        resDom.className = 'result wrong';
+        resDom.innerText = `❌ 正确答案：${w.pos ? w.pos + ' ' : ''}${targetOf(w)}`;
+    }
+    saveData();
+    recordStat(opts[i].ok);
+    setTimeout(nextWord, 1100);
+}
+
+// ================= 朗读 =================
+function speak(en){
+    try{
+        const u = new SpeechSynthesisUtterance(en);
+        u.lang = 'en-US';
+        u.rate = 0.9;
+        const v = speechSynthesis.getVoices().find(x => x.lang.toLowerCase().startsWith('en'));
+        if(v) u.voice = v;
+        speechSynthesis.speak(u);
+    }catch(e){}
+}
+
+function speakWord(){ if(currentWord) speak(currentWord.en); }
+function speakIdx(i){ speak(wordList[i].en); }
+
+// ================= 同义词归类 =================
+function keysOf(w){
+    return (w.cn || '').split(/[；;、，,。．.\s]+/).map(s => s.trim()).filter(Boolean);
+}
+
+function related(a, b){
+    if(a === b) return true;
+    return a.length >= 2 && b.length >= 2 && (a.includes(b) || b.includes(a));
+}
+
+function buildClusters(){
+    const n = wordList.length;
+    const parent = Array.from({length:n}, (_, i) => i);
+    const find = x => { while(parent[x] !== x){ parent[x] = parent[parent[x]]; x = parent[x]; } return x; };
+    const union = (a, b) => { parent[find(a)] = find(b); };
+    const keys = wordList.map(keysOf);
+    for(let i = 0; i < n; i++){
+        for(let j = i + 1; j < n; j++){
+            if(keys[i].some(a => keys[j].some(b => related(a, b)))) union(i, j);
+        }
+    }
+    const map = {};
+    wordList.forEach((w, i) => { const r = find(i); (map[r] = map[r] || []).push(w); });
+    return Object.values(map);
+}
+
+function groupLabel(words){
+    const freq = {};
+    words.forEach(w => keysOf(w).forEach(k => freq[k] = (freq[k] || 0) + 1));
+    let best = '';
+    for(const k in freq){
+        if(!best || freq[k] > freq[best] || (freq[k] === freq[best] && k.length < best.length)) best = k;
+    }
+    return best;
+}
+
+function sameGroup(w){
+    return buildClusters().find(g => g.includes(w)) || [];
+}
+
+function renderClusters(){
+    const list = document.getElementById('clsList');
+    const cnt = document.getElementById('clsCount');
+    const clusters = buildClusters();
+    const groups = clusters.filter(g => g.length > 1);
+    const singles = clusters.length - groups.length;
+    cnt.innerText = groups.length ? `（发现 ${groups.length} 组同义词，${singles} 个独立词）` : '（暂未发现同义词组）';
+    if(!groups.length){
+        list.innerHTML = '<div class="none">词库里还没有同义词，导入更多单词后会自动归类</div>';
+        return;
+    }
+    list.innerHTML = groups.map((g, i) => `
+        <div class="cls-card">
+            <div class="cls-tags">📌 共同意思：${esc(groupLabel(g))}</div>
+            <div id="cls-chips-${i}">
+                ${g.map((w, j) => `<button class="cls-chip" onclick="toggleClsCard(${i},${j})">${esc(w.en)}</button>`).join('')}
+            </div>
+            <div class="cls-body" id="cls-body-${i}" style="display:none">
+                ${g.map(w => `<div class="cls-word">${esc(w.en)}<span class="cls-cn">${esc([w.pos, w.cn].filter(Boolean).join(' '))}</span></div>`).join('')}
+            </div>
+        </div>`).join('');
+}
+
+function toggleClsCard(i, j){
+    const body = document.getElementById(`cls-body-${i}`);
+    const open = body.style.display === 'block';
+    body.style.display = open ? 'none' : 'block';
+    document.querySelectorAll(`#cls-chips-${i} .cls-chip`).forEach((c, k) => c.classList.toggle('cls-chip-on', !open && k === j));
+}
+
+function toggleSync(){
+    const box = document.getElementById('syncBox');
+    const w = currentWord;
+    if(!w) return;
+    if(box.style.display === 'block'){ box.style.display = 'none'; return; }
+    const sibs = sameGroup(w).filter(x => x !== w);
+    box.innerHTML = sibs.length
+        ? `<h4>🔗 与「${esc(w.en)}」同义的单词</h4>` + sibs.map(x => `<div class="cls-word">${esc(x.en)}<span class="cls-cn">${esc([x.pos, x.cn].filter(Boolean).join(' '))}</span></div>`).join('')
+        : '<div class="none">暂未找到同义词</div>';
+    box.style.display = 'block';
+}
+
+// ================= 单词本 =================
+function renderBook(){
+    const kw = (document.getElementById('bkSearch').value || '').trim().toLowerCase();
+    const el = document.getElementById('bkList');
+    document.getElementById('bkCount').innerText = wordList.length;
+    const rows = [];
+    wordList.forEach((w, i) => {
+        if(kw && !w.en.toLowerCase().includes(kw) && !w.cn.includes(kw)) return;
+        const lv = w.level || 0;
+        const lvName = ['未掌握', '学习中', '已掌握'][lv];
+        rows.push(`<div class="bk-row">
+            <button class="btn-gray" style="margin:0;padding:4px 10px" onclick="speakIdx(${i})">🔊</button>
+            <span class="bk-en">${esc(w.en)}</span>
+            <span class="bk-pos">${esc(w.pos || '')}</span>
+            <span class="bk-ph">${esc(w.ph || '')}</span>
+            <span class="bk-cn">${esc(w.cn)}</span>
+            <span class="bk-level lv${lv}" title="连续答对 3 次升为已掌握">${lvName}</span>
+        </div>`);
+    });
+    el.innerHTML = rows.length ? rows.join('') : '<div class="none">没有匹配的单词</div>';
+}
+
+// ================= 统计与打卡 =================
+function recordStat(ok){
+    const t = todayStr();
+    const stats = getStats();
+    let day = stats.find(s => s.d === t);
+    if(!day){ day = {d:t, total:0, right:0, wrong:0}; stats.push(day); }
+    day.total++;
+    if(ok) day.right++; else day.wrong++;
+    saveStats(stats);
+    const ci = getCheckin();
+    if(!ci.includes(t)){ ci.push(t); saveCheckin(ci); }
+    renderTodayLine();
+}
+
+function streakDays(){
+    const set = new Set(getCheckin());
+    const d = new Date();
+    if(!set.has(todayStrFrom(d))) d.setDate(d.getDate() - 1);
+    let n = 0;
+    while(set.has(todayStrFrom(d))){ n++; d.setDate(d.getDate() - 1); }
+    return n;
+}
+
+function renderTodayLine(){
+    const stats = getStats();
+    const day = stats.find(s => s.d === todayStr());
+    document.getElementById('todayLine').innerText = day
+        ? `今日：已练 ${day.total} 词 · 对 ${day.right} · 错 ${day.wrong} · 正确率 ${Math.round(day.right / day.total * 100)}%`
+        : '今日：还没开始练习，加油！';
+    document.getElementById('statToday').innerHTML = `
+        <div class="stat"><b>${day ? day.total : 0}</b><span>今日练习</span></div>
+        <div class="stat"><b style="color:#34d399">${day ? day.right : 0}</b><span>答对</span></div>
+        <div class="stat"><b style="color:#f87171">${day ? day.wrong : 0}</b><span>答错</span></div>
+        <div class="stat"><b>${day && day.total ? Math.round(day.right / day.total * 100) : 0}%</b><span>今日正确率</span></div>`;
+}
+
+function renderHeat(){
+    const el = document.getElementById('heatMap');
+    const map = {};
+    getStats().forEach(s => map[s.d] = s);
+    const cells = [];
+    const d = new Date();
+    for(let i = 29; i >= 0; i--){
+        const dt = new Date(d);
+        dt.setDate(d.getDate() - i);
+        const key = todayStrFrom(dt);
+        const s = map[key];
+        let cls = '', tip = key;
+        if(s){
+            const acc = Math.round(s.right / s.total * 100);
+            cls = acc >= 80 ? 'd3' : (acc >= 50 ? 'd0' : (acc >= 20 ? 'd1' : 'd2'));
+            tip = `${key}：${s.total} 词，正确率 ${acc}%`;
+        }
+        cells.push(`<div class="day ${cls}" title="${tip}">${dt.getDate()}</div>`);
+    }
+    el.innerHTML = cells.join('');
+}
+
+function renderMastery(){
+    const n = wordList.length;
+    const lv = [0, 0, 0];
+    wordList.forEach(w => lv[w.level || 0]++);
+    const pct = i => n ? Math.round(lv[i] / n * 100) : 0;
+    const bar = document.getElementById('lvBar');
+    const parts = [];
+    if(lv[0]) parts.push(`<div style="background:#ef4444;width:${pct(0)}%">${pct(0)}%</div>`);
+    if(lv[1]) parts.push(`<div style="background:#f59e0b;width:${pct(1)}%">${pct(1)}%</div>`);
+    if(lv[2]) parts.push(`<div style="background:#10b981;width:${pct(2)}%">${pct(2)}%</div>`);
+    if(!parts.length) parts.push('<div class="none" style="width:100%">暂无数据</div>');
+    bar.innerHTML = parts.join('');
+    document.getElementById('lvCount').innerText = n;
+    document.getElementById('lvLegend').innerHTML = `
+        <div class="stat"><b style="color:#ef4444">${lv[0]}</b><span>未掌握</span></div>
+        <div class="stat"><b style="color:#f59e0b">${lv[1]}</b><span>学习中</span></div>
+        <div class="stat"><b style="color:#10b981">${lv[2]}</b><span>已掌握</span></div>`;
+}
+
+function renderStatViews(){
+    renderTodayLine();
+    document.getElementById('streakNum').innerText = streakDays();
+    renderHeat();
+    renderMastery();
+}
+
+// ================= 初始化 =================
+saveData();
+renderTodayLine();
+resetPool();
+</script>
+</body>
+</html>
